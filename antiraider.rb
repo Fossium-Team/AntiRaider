@@ -1,6 +1,28 @@
 require 'discordrb'
 require 'json'
 
+def writeconfig
+  print "Enter your bot token: "
+  token = gets.chomp
+  print "Is this correct? \"#{token}\"\n(y)es\n(n)o\n"
+  confirmation = gets.chomp
+  if confirmation.downcase != "y" && confirmation.downcase != "yes"
+    puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWrong token given"
+    puts "Re-running config creator\n\n"
+    writeconfig
+    return
+  end
+  puts "Writing config..."
+  jsonwrite = "{'token': '#{token}'}".gsub("'", '"')
+  File.open("./config.json", 'w') { |file| file.write(jsonwrite) }
+end
+
+unless File.exist?('./config.json')
+  puts "No config found\nStarting the config creator...\n"
+  writeconfig
+  puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the bot..."
+end
+
 jsonfile = File.read('./config.json')
 jsonhash = JSON.parse(jsonfile)
 
