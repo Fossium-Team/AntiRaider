@@ -27,8 +27,8 @@ jsonfile = File.read('./config.json')
 $jsonhash = JSON.parse(jsonfile)
 
 def startbot
-  # RubyMine is being stupid with error_handler, it works fine, will try to fix this tomorrow
-  $bot = Discordrb::Bot.new(token: $jsonhash['token'], error_handler: errorbot, intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
+  # The error handler is in place but isn't used yet, will fix this tomorrow
+  $bot = Discordrb::Bot.new(token: $jsonhash['token'], intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
 end
 
 def errorbot(error)
@@ -55,6 +55,14 @@ begin
   startbot
 rescue => error
   errorbot(error)
+end
+
+$bot.ready do |_|
+  puts "----------------------------------------"
+  puts "Connected!"
+  puts "Logged in as #{$bot.profile.name}##{$bot.profile.discriminator}"
+  puts "----------------------------------------"
+  $bot.watching = "for raids"
 end
 
 $bot.member_join do |event|
