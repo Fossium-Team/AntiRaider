@@ -24,12 +24,41 @@ unless File.exist?('./config.json')
 end
 
 jsonfile = File.read('./config.json')
-jsonhash = JSON.parse(jsonfile)
+$jsonhash = JSON.parse(jsonfile)
 
-bot = Discordrb::Bot.new(token: jsonhash['token'], intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
+def startbot
+  # RubyMine is being stupid with error_handler, it works fine, will try to fix this tomorrow
+  $bot = Discordrb::Bot.new(token: $jsonhash['token'], error_handler: errorbot, intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
+end
 
-bot.member_join do |event|
+def errorbot(error)
+  puts "Oops...\nSomething went wrong"
+  puts "In most cases this means that the token is invalid"
+  puts "Do you want to\n(r)ewrite the config\n(q)uit\n"
+  answer = gets.chomp
+  if answer == "r"
+    puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the config creator..."
+    writeconfig
+    puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the bot..."
+    startbot
+    return
+  elsif answer == "q"
+    exit
+  else
+    puts "That option does not exist\n"
+    errorbot(error)
+    return
+  end
+end
+
+begin
+  startbot
+rescue => error
+  errorbot(error)
+end
+
+$bot.member_join do |event|
   puts event.user.username
 end
 
-bot.run
+$bot.run
