@@ -13,7 +13,7 @@ def writeconfig
     return
   end
   puts "Writing config..."
-  jsonwrite = "{'token': '#{token}'}".gsub("'", '"')
+  jsonwrite = "{\"token\": \"#{token}\"}"
   File.open("./config.json", 'w') { |file| file.write(jsonwrite) }
 end
 
@@ -26,47 +26,43 @@ end
 jsonfile = File.read('./config.json')
 $jsonhash = JSON.parse(jsonfile)
 
-def startbot
-  # The error handler is in place but isn't used yet, will fix this tomorrow
-  $bot = Discordrb::Bot.new(token: $jsonhash['token'], intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
-end
-
-def errorbot(error)
-  puts "Oops...\nSomething went wrong"
-  puts "In most cases this means that the token is invalid"
-  puts "Do you want to\n(r)ewrite the config\n(q)uit\n"
-  answer = gets.chomp
-  if answer == "r"
-    puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the config creator..."
-    writeconfig
-    puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the bot..."
-    startbot
-    return
-  elsif answer == "q"
-    exit
-  else
-    puts "That option does not exist\n"
-    errorbot(error)
-    return
+def validatetoken
+  begin
+    Discordrb::API.validate_token("Bot #{$jsonhash['token']}")
+  rescue
+    puts "Oops...\nSomething went wrong"
+    puts "In most cases this means that the token is invalid or that you did not enable all intents"
+    puts "Do you want to\n(r)ewrite the config\n(q)uit\n"
+    answer = gets.chomp
+    if answer == "r"
+      puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the config creator..."
+      writeconfig
+      puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the bot...\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+      validatetoken
+      return
+    elsif answer == "q"
+      exit
+    else
+      puts "That option does not exist\n"
+      validatetoken
+      return
+    end
   end
 end
 
-begin
-  startbot
-rescue => error
-  errorbot(error)
-end
+validatetoken
+bot = Discordrb::Bot.new(token: $jsonhash['token'], intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
 
-$bot.ready do |_|
+bot.ready do |_|
   puts "----------------------------------------"
   puts "Connected!"
-  puts "Logged in as #{$bot.profile.name}##{$bot.profile.discriminator}"
+  puts "Logged in as #{bot.profile.name}##{bot.profile.discriminator}"
   puts "----------------------------------------"
-  $bot.watching = "for raids"
+  bot.watching = "for raids"
 end
 
-$bot.member_join do |event|
+bot.member_join do |event|
   puts event.user.username
 end
 
-$bot.run
+bot.run
