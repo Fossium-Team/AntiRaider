@@ -5,7 +5,7 @@ A simple anti-raid Discord Bot
 ## Installing
 Download the latest release [here](https://github/Fossium-Team/AntiRaider/releases/latest) and unzip it in a preferred folder
 #### Install Ruby:
-  Windows: Download the latest Ruby __+Devkit__ [here](https://rubyinstaller.org/downloads/)\
+  Windows: Download the latest **Ruby+Devkit** [here](https://rubyinstaller.org/downloads/)\
   Linux: Install `ruby` (on Debian/Ubuntu `ruby-full`) from your favorite package manager\
   MacOS: **Don't use the included Ruby with MacOS** install it with homebrew instead `brew install ruby`\
 #### After that install Discordrb:
