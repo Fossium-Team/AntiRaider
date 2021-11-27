@@ -11,5 +11,6 @@ Download the latest release [here](https://github/Fossium-Team/AntiRaider/releas
 #### After that install Discordrb:
   Windows: `gem install discordrb --platform=ruby`\
   Linux/MacOS: `gem install discordrb`\
+ 
 This may take some time because it needs to build system native extensions\
 After that you can run the Ruby file (just opening it should work, if it doesn't use Powershell/CMD or the terminal)
