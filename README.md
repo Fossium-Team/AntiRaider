@@ -7,7 +7,7 @@ Download the latest release [here](https://github/Fossium-Team/AntiRaider/releas
 #### Install Ruby:
   Windows: Download the latest **Ruby+Devkit** [here](https://rubyinstaller.org/downloads/)\
   Linux: Install `ruby` (on Debian/Ubuntu `ruby-full`) from your favorite package manager\
-  MacOS: **Don't use the included Ruby with MacOS** install it with homebrew instead `brew install ruby`\
+  MacOS: **Don't use the included Ruby with MacOS** install it with homebrew instead `brew install ruby`
 #### After that install Discordrb:
   Windows: `gem install discordrb --platform=ruby`\
   Linux/MacOS: `gem install discordrb`
