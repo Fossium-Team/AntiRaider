@@ -1,5 +1,7 @@
 require 'discordrb'
+require 'time'
 require 'json'
+require 'fileutils'
 
 def writeconfig
   print "Enter your bot token: "
@@ -23,6 +25,10 @@ unless File.exist?('./config.json')
   puts "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nStarting the bot..."
 end
 
+if File.directory?('temp/')
+  FileUtils.remove_dir('temp/')
+end
+Dir.mkdir('temp/')
 jsonfile = File.read('./config.json')
 $jsonhash = JSON.parse(jsonfile)
 
@@ -62,7 +68,15 @@ bot.ready do |_|
 end
 
 bot.member_join do |event|
-  puts event.user.username
+  if File.exist?("temp/#{event.server.id}.log")
+    file = File.open("temp/#{event.server.id}.log", "a")
+    file.write("\n#{Time.now}")
+    file.close
+  else
+    file = File.open("temp/#{event.server.id}.log", "w")
+    file.write(Time.now)
+    file.close
+  end
 end
 
 bot.run
