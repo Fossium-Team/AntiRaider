@@ -1,6 +1,6 @@
 ![AntiRaider](https://raw.githubusercontent.com/Fossium-Team/AntiRaider/main/images/AntiRaider_Full_White.png)
 # AntiRaider
-A simple anti-raid Discord Bot
+A simple anti-raid Discord bot
 
 ## Installing
 First, create a bot application [here](https://discord.com/developers) (if you don't know how, search it with your preferred search engine) **make sure all intents are enabled**\
