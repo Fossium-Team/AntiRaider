@@ -15,7 +15,7 @@ def writeconfig
     return
   end
   puts "Writing config..."
-  jsonwrite = "{\"token\": \"#{token}\"}"
+  jsonwrite = "{\"token\":\"#{token}\"}"
   File.open("./config.json", 'w') { |file| file.write(jsonwrite) }
 end
 
@@ -56,8 +56,21 @@ def validatetoken
   end
 end
 
+class String
+  public
+
+  def is_number?
+    begin
+      Float(self)
+      return true
+    rescue
+      return false
+    end
+  end
+end
+
 validatetoken
-bot = Discordrb::Bot.new(token: $jsonhash['token'], intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
+bot = Discordrb::Commands::CommandBot.new(token: $jsonhash['token'], prefix: "ar!", intents: [:servers, :server_messages, :server_bans, :server_emojis, :server_integrations, :server_webhooks, :server_invites, :server_voice_states, :server_presences, :server_message_reactions, :server_message_typing, :direct_messages, :direct_message_reactions, :direct_message_typing, :server_members])
 
 bot.ready do |_|
   puts "----------------------------------------"
@@ -65,6 +78,67 @@ bot.ready do |_|
   puts "Logged in as #{bot.profile.name}##{bot.profile.discriminator}"
   puts "----------------------------------------"
   bot.watching = "for raids"
+end
+
+bot.command :config do |event, setting, option|
+  unless setting
+    event.channel.send_embed do |embed|
+      embed.colour = 0x0080FF
+      embed.title = 'Settings'
+      embed.description = "timebetweenfiles: time in minutes\nmaxpeople: number"
+    end
+  end
+  if setting == 'timebetweenfiles'
+    unless option
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'No option given'
+      end
+    end
+    unless option.is_number?
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'That is not a number'
+      end
+      next
+    end
+    configfile = File.read('./config.json')
+    confighash = JSON.parse(configfile)
+    confighash['timebetweenfiles'] = option
+    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+    event.channel.send_embed do |embed|
+      embed.colour = 0x0080FF
+      embed.title = "Set `timebetweenfiles` to `#{option}`"
+    end
+    next
+  elsif setting == 'maxpeople'
+    unless option
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'No option given'
+      end
+    end
+    unless option.is_number?
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'That is not a number'
+      end
+      next
+    end
+    configfile = File.read('./config.json')
+    confighash = JSON.parse(configfile)
+    confighash['maxpeople'] = option
+    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+    event.channel.send_embed do |embed|
+      embed.colour = 0x0080FF
+      embed.title = "Set `maxpeople` to `#{option}`"
+    end
+    next
+  end
 end
 
 bot.member_join do |event|
