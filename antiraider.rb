@@ -76,7 +76,7 @@ bot.member_join do |event|
       file.write(Time.now)
       file.write("\n#{event.user.id}")
       file.close
-      return
+      next
     end
     file = File.open("temp/#{event.server.id}.log", "a")
     file.write("\n#{event.user.id}")
