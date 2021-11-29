@@ -73,8 +73,9 @@ bot.member_join do |event|
     # file.write("\n#{Time.now.to_i}")
     # file.close
     file = File.open("temp/#{event.server.id}.json")
-    output["data"].push("{\"#{event.user.id}\":\"#{time.now.to_i}\"}")
-    file.write(output)
+    data = json.parse(file)
+    data["data"].push("{\"#{event.user.id}\":\"#{time.now.to_i}\"}")
+    file.write(data)
     file.close
   else
     # file = File.open("temp/#{event.server.id}.log", "w")
