@@ -69,12 +69,26 @@ end
 
 bot.member_join do |event|
   if File.exist?("temp/#{event.server.id}.log")
+    filetime = Time.parse(File.foreach("temp/#{event.server.id}.log").first)
+    difference = Time.now - filetime
+    if difference >= 300
+      File.delete("temp/#{event.server.id}.log")
+      file = File.open("temp/#{event.server.id}.log", "w")
+      file.write(Time.now)
+      file.write("\n#{event.user.id}")
+      file.close
+    end
     file = File.open("temp/#{event.server.id}.log", "a")
-    file.write("\n#{Time.now}")
+    file.write("\n#{event.user.id}")
     file.close
+    linecount = File.open("temp/#{event.server.id}.log", "r").each_line.count - 1
+    if linecount >= 5
+      event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
+    end
   else
     file = File.open("temp/#{event.server.id}.log", "w")
     file.write(Time.now)
+    file.write("\n#{event.user.id}")
     file.close
   end
 end
