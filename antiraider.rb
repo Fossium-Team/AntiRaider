@@ -82,6 +82,10 @@ bot.ready do |_|
   bot.watching = "for raids"
 end
 
+bot.mention do |event|
+  event.channel.send_message("My prefix is `ar!`", false, nil, nil, nil, event.message)
+end
+
 bot.command :config, description: 'Configure the bot' do |event, setting, option|
   unless event.user.permission?(:administrator)
     event.channel.send_embed do |embed|
@@ -176,14 +180,17 @@ end
 bot.member_join do |event|
   configfile = File.read('./config.json')
   confighash = JSON.parse(configfile)
-  timespan = confighash['timespan'] * 60
-  if timespan == nil
-    timespan = "300"
+  if confighash['timespan'] == nil
+    timespan = 300
+  else
+    timespan = Integer(confighash['timespan']) * 60
   end
-  maxjoins = confighash['maxjoins']
-  if maxjoins == nil
-    maxjoins = "10"
+  if confighash['maxjoins'] == nil
+    maxjoins = 10
+  else
+    maxjoins = Integer(confighash['maxjoins'])
   end
+
   if File.exist?("temp/#{event.server.id}.log")
     filetime = Time.parse(File.foreach("temp/#{event.server.id}.log").first)
     difference = Time.now - filetime
@@ -199,6 +206,12 @@ bot.member_join do |event|
     file.close
     linecount = File.open("temp/#{event.server.id}.log", "r").each_line.count - 1
     if linecount >= maxjoins
+      event.user.pm.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Kicked by AntiRaider'
+        embed.description = 'Hello, you have been kicked by AntiRaider because you might be a raider'
+        embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'If you are not a raider please wait a few minutes and try to join again')
+      end
       event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
     end
   else
