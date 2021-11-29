@@ -72,11 +72,11 @@ bot.member_join do |event|
     filetime = Time.parse(File.foreach("temp/#{event.server.id}.log").first)
     difference = Time.now - filetime
     if difference >= 300
-      File.delete("temp/#{event.server.id}.log")
       file = File.open("temp/#{event.server.id}.log", "w")
       file.write(Time.now)
       file.write("\n#{event.user.id}")
       file.close
+      return
     end
     file = File.open("temp/#{event.server.id}.log", "a")
     file.write("\n#{event.user.id}")
