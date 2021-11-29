@@ -69,12 +69,20 @@ end
 
 bot.member_join do |event|
   if File.exist?("temp/#{event.server.id}.log")
-    file = File.open("temp/#{event.server.id}.log", "a")
-    file.write("\n#{Time.now}")
+    # file = File.open("temp/#{event.server.id}.log", "a")
+    # file.write("\n#{Time.now.to_i}")
+    # file.close
+    file = File.open("temp/#{event.server.id}.json")
+    output["data"].push("{\"#{event.user.id}\":\"#{time.now.to_i}\"}")
+    file.write(output)
     file.close
   else
-    file = File.open("temp/#{event.server.id}.log", "w")
-    file.write(Time.now)
+    # file = File.open("temp/#{event.server.id}.log", "w")
+    # file.write(Time.now)
+    # file.close
+    file = File.open("temp/#{event.server.id}.json")
+    output = "\"data\":{\"#{event.user.id}\":\"#{time.now.to_i}\"}}"
+    file.write(output)
     file.close
   end
 end
