@@ -15,15 +15,10 @@ def writeconfig
     return
   end
   puts "Writing config..."
-  if File.exist?('./config.json')
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    confighash['token'] = token
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    return
-  end
-  jsonwrite = "{\"token\":\"#{token}\"}"
-  File.open("./config.json", 'w') { |file| file.write(jsonwrite) }
+  configfile = File.read('./config.json')
+  confighash = JSON.parse(configfile)
+  confighash['token'] = token
+  File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
 end
 
 unless File.exist?('./config.json')
