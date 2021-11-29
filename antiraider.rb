@@ -81,6 +81,14 @@ bot.ready do |_|
 end
 
 bot.command :config do |event, setting, option|
+  unless event.user.permission?(:administrator)
+    event.channel.send_embed do |embed|
+      embed.colour = 0xFF0000
+      embed.title = 'Oops..'
+      embed.description = "You need to have the `Administrator` permission to use this command"
+    end
+    next
+  end
   unless setting
     event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
