@@ -150,10 +150,20 @@ bot.command :config do |event, setting, option|
 end
 
 bot.member_join do |event|
+  configfile = File.read('./config.json')
+  confighash = JSON.parse(configfile)
+  timebetweenfiles = confighash['timebetweenfiles'] * 60
+  if timebetweenfiles == nil
+    timebetweenfiles = "300"
+  end
+  maxpeople = confighash['maxpeople']
+  if maxpeople == nil
+    maxpeople = "10"
+  end
   if File.exist?("temp/#{event.server.id}.log")
     filetime = Time.parse(File.foreach("temp/#{event.server.id}.log").first)
     difference = Time.now - filetime
-    if difference >= 300
+    if difference >= timebetweenfiles
       file = File.open("temp/#{event.server.id}.log", "w")
       file.write(Time.now)
       file.write("\n#{event.user.id}")
@@ -164,7 +174,7 @@ bot.member_join do |event|
     file.write("\n#{event.user.id}")
     file.close
     linecount = File.open("temp/#{event.server.id}.log", "r").each_line.count - 1
-    if linecount >= 5
+    if linecount >= maxpeople
       event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
     end
   else
