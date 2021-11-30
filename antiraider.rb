@@ -85,18 +85,19 @@ def captchagen
   number1 = rand 1..20
   number2 = rand 1..20
   question = "#{number1} #{operation} #{number2}"
+  if !(number1 % number2 == 0)
+    captchagen
+  end
   if operation == "x"
-    answer = eval("#{number1} * #{number2}")
-
+    answer = number1.send(:*, number2)
   elsif operation == ":"
-    answer = eval("#{number1} / #{number2}")
-
-  else
-    answer = eval("#{number1} #{operation} #{number2}")
+    answer = number1.send(:/, number2)
+  elsif operation == "+"
+    answer = number1.send(:+, number2)
+  elsif operation == "-"
+    answer = number1.send(:-, number2)
   end
   if Integer(answer) < 0
-    captchagen
-  elsif !(answer % 1 == 0)
     captchagen
   else
     return question, answer
@@ -140,6 +141,11 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     else
       maxjoins = Integer(confighash['maxjoins'])
     end
+    if confighash['captchaenabled'] == nil
+      captchaenabled = "false"
+    else
+      captchaenabled = confighash['captchaenabled']
+    end
 
     event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
@@ -152,6 +158,10 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
         Discordrb::Webhooks::EmbedField.new(
           name: 'timespan: time in minutes',
           value: "Currently set to: #{timespan}"
+        ),
+        Discordrb::Webhooks::EmbedField.new(
+          name: 'captchaenabled: true or false',
+          value: "Currently set to: #{captchaenabled}"
         )
       ]
     end
@@ -163,6 +173,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
         embed.title = 'Oops...'
         embed.description = 'No option given'
       end
+      next
     end
     unless option.is_number?
       event.channel.send_embed do |embed|
@@ -188,6 +199,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
         embed.title = 'Oops...'
         embed.description = 'No option given'
       end
+      next
     end
     unless option.is_number?
       event.channel.send_embed do |embed|
@@ -204,6 +216,32 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
       embed.title = "Set `maxjoins` to `#{option}`"
+    end
+    next
+  elsif setting == 'captchaenabled'
+    unless option
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'No option given'
+      end
+      next
+    end
+    if option != "true" && option != "false"
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = "Incorrect option\nCorrect options: true and false"
+      end
+      next
+    end
+    configfile = File.read('./config.json')
+    confighash = JSON.parse(configfile)
+    confighash['captchaenabled'] = option
+    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+    event.channel.send_embed do |embed|
+      embed.colour = 0x0080FF
+      embed.title = "Set `captchaenabled` to `#{option}`"
     end
     next
   end
@@ -259,7 +297,7 @@ bot.member_join do |event|
         embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'If you are not a raider please wait a few minutes and try to join again')
       end
       begin
-        event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
+        event.server.kick(event.user, 'Might be a raider - AntiRaider')
       rescue
         event.server.members.each do |member|
           if member.bot_account
@@ -284,10 +322,38 @@ bot.member_join do |event|
     file.close
   end
   # WIP
-  if confighash['captchaenabled'] == 'yes'
-    operation, answer = captchagen
-    puts operation
+  if confighash['captchaenabled'] == 'true'
+    question, answer = captchagen
+    puts question
     puts answer
+    event.user.pm.send_embed do |embed|
+      embed.colour = 0xFF0000
+      embed.title = 'Captcha'
+      embed.description = "What is `#{question}`"
+    end
+    triesleft = 5
+    event.user.await! do |captcha|
+      # i have no idea what im doing wrong here, will check tomorrow
+      if captcha.message.content == answer
+        event.user.pm("Correct!")
+        true
+      else
+        triesleft -= 1
+        if triesleft == 0
+          event.user.pm('You are out of tries')
+          event.server.kick(event.user, 'Failed captcha - AntiRaider')
+          true
+        end
+        if triesleft == 1
+          event.user.pm("Incorrect, you have #{triesleft} try left")
+        elsif triesleft <= -1
+          next
+        else
+          event.user.pm("Incorrect, you have #{triesleft} tries left")
+        end
+        false
+      end
+    end
   end
 end
 
