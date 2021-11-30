@@ -178,6 +178,20 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
 end
 
 bot.member_join do |event|
+  if event.server.bot.permission?(:kick_members)
+    event.server.members.each do |member|
+      if member.bot_account
+        next
+      end
+      if member.permission?(:administrator)
+        member.pm.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "I do not have the kick members permission\nI need the kick members permission to kick raiders"
+        end
+      end
+    end
+  end
   configfile = File.read('./config.json')
   confighash = JSON.parse(configfile)
   if confighash['timespan'] == nil
