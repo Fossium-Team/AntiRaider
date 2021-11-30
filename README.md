@@ -13,5 +13,5 @@ After that, download the latest release [here](https://github/Fossium-Team/AntiR
 #### After that install all the gems:
   `bundle install` (in the AntiRaider directory)
  
-This may take some time because discordrb needs to build system native extensions\
+This may take some time because some gems need to build system native extensions\
 After that you can run the Ruby file (just opening it should work, if it doesn't or if you use a terminal-based OS use Powershell/CMD or the terminal: `ruby ./antiraider.rb`)
