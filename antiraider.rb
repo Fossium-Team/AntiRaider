@@ -178,7 +178,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
 end
 
 bot.member_join do |event|
-  if event.server.bot.permission?(:kick_members)
+  unless event.server.bot.permission?(:kick_members)
     event.server.members.each do |member|
       if member.bot_account
         next
