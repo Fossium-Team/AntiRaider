@@ -1,8 +1,3 @@
-require 'discordrb'
-require 'time'
-require 'json'
-require 'fileutils'
-
 def writeconfig
   print "Enter your bot token: "
   token = gets.chomp
@@ -68,6 +63,38 @@ class String
     rescue
       return false
     end
+  end
+end
+
+def captchagen
+  randomoperation = rand 1..4
+  if randomoperation == 1
+    operation = "+"
+  elsif randomoperation == 2
+    operation = "-"
+  elsif randomoperation == 3
+    operation = "x"
+  elsif randomoperation == 4
+    operation = ":"
+  end
+  number1 = rand 1..20
+  number2 = rand 1..20
+  question = "#{number1} #{operation} #{number2}"
+  if operation == "x"
+    answer = eval("#{number1} * #{number2}")
+
+  elsif operation == ":"
+    answer = eval("#{number1} / #{number2}")
+
+  else
+    answer = eval("#{number1} #{operation} #{number2}")
+  end
+  if Integer(answer) < 0
+    captchagen
+  elsif !(answer % 1 == 0)
+    captchagen
+  else
+    return question, answer
   end
 end
 
@@ -226,13 +253,34 @@ bot.member_join do |event|
         embed.description = 'Hello, you have been kicked by AntiRaider because you might be a raider'
         embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'If you are not a raider please wait a few minutes and try to join again')
       end
-      event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
+      begin
+        event.server.kick(event.user, 'Might be a raider - Detected by AntiRaider')
+      rescue
+        event.server.members.each do |member|
+          if member.bot_account
+            next
+          end
+          if member.permission?(:administrator)
+            member.pm.send_embed do |embed|
+              embed.colour = 0xFF0000
+              embed.title = 'Oops...'
+              embed.description = "I could not kick #{member.username}##{member.discriminator}"
+            end
+          end
+        end
+      end
     end
   else
     file = File.open("temp/#{event.server.id}.log", "w")
     file.write(Time.now)
     file.write("\n#{event.user.id}")
     file.close
+  end
+  # WIP
+  if confighash['captchaenabled'] == 'yes'
+    operation, answer = captchagen
+    puts operation
+    puts answer
   end
 end
 
