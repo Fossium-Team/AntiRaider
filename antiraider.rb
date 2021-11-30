@@ -1,3 +1,8 @@
+require 'discordrb'
+require 'time'
+require 'fileutils'
+require 'json'
+
 def writeconfig
   print "Enter your bot token: "
   token = gets.chomp
@@ -268,6 +273,8 @@ bot.member_join do |event|
             end
           end
         end
+      ensure
+        next
       end
     end
   else
