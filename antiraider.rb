@@ -63,7 +63,6 @@ end
 
 class String
   public
-
   def is_number?
     begin
       Float(self)
@@ -75,36 +74,34 @@ class String
 end
 
 def captchagen
-  randomoperation = rand 1..4
-  if randomoperation == 1
-    operation = "+"
-  elsif randomoperation == 2
-    operation = "-"
-  elsif randomoperation == 3
-    operation = "x"
-  elsif randomoperation == 4
-    operation = ":"
+  question = ""
+  answer = ""
+  loop do
+    randomoperation = rand 1..4
+    if randomoperation == 1
+      operation = "+"
+    elsif randomoperation == 2
+      operation = "-"
+    elsif randomoperation == 3
+      operation = "x"
+    elsif randomoperation == 4
+      operation = ":"
+    end
+    number1 = rand 3..10
+    number2 = rand 3..10
+    question = "#{number1} #{operation} #{number2}"
+    if operation == "x"
+      answer = number1.send(:*, number2)
+    elsif operation == ":"
+      answer = number1.send(:/, number2)
+    elsif operation == "+"
+      answer = number1.send(:+, number2)
+    elsif operation == "-"
+      answer = number1.send(:-, number2)
+    end
+  break if !(answer % 1 != 0) && Integer(answer) >= 0
   end
-  number1 = rand 1..20
-  number2 = rand 1..20
-  question = "#{number1} #{operation} #{number2}"
-  if !(number1 % number2 == 0)
-    captchagen
-  end
-  if operation == "x"
-    answer = number1.send(:*, number2)
-  elsif operation == ":"
-    answer = number1.send(:/, number2)
-  elsif operation == "+"
-    answer = number1.send(:+, number2)
-  elsif operation == "-"
-    answer = number1.send(:-, number2)
-  end
-  if Integer(answer) < 0
-    captchagen
-  else
-    return question, answer
-  end
+  return question, answer
 end
 
 validatetoken
@@ -115,7 +112,7 @@ bot.ready do |_|
   puts "Connected!"
   puts "Logged in as #{bot.profile.name}##{bot.profile.discriminator}"
   puts "----------------------------------------"
-  bot.watching = "for raids"
+  bot.watching = "for raids | ar!help"
 end
 
 bot.mention do |event|
@@ -149,6 +146,11 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     else
       captchaenabled = confighash['captchaenabled']
     end
+    if confighash['captcharole'] == nil
+      captcharole = "none"
+    else
+      captcharole = confighash['captcharole']
+    end
 
     event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
@@ -165,6 +167,10 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
         Discordrb::Webhooks::EmbedField.new(
           name: 'captchaenabled: true or false',
           value: "Currently set to: #{captchaenabled}"
+        ),
+        Discordrb::Webhooks::EmbedField.new(
+          name: 'captcharole: role id (of the role that the user gets after doing the captcha)',
+          value: "Currently set to: #{captcharole}"
         )
       ]
     end
@@ -191,7 +197,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash['timespan'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
     event.channel.send_embed do |embed|
-      embed.colour = 0x0080FF
+      embed.colour = 0x2ECC70
       embed.title = "Set `timespan` to `#{option}`"
     end
     next
@@ -217,7 +223,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash['maxjoins'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
     event.channel.send_embed do |embed|
-      embed.colour = 0x0080FF
+      embed.colour = 0x2ECC70
       embed.title = "Set `maxjoins` to `#{option}`"
     end
     next
@@ -240,11 +246,53 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     end
     configfile = File.read('./config.json')
     confighash = JSON.parse(configfile)
+    if confighash['captcharole'] == nil && option != "false"
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = "Please set `captcharole` first"
+      end
+      next
+    end
     confighash['captchaenabled'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
     event.channel.send_embed do |embed|
-      embed.colour = 0x0080FF
+      embed.colour = 0x2ECC70
       embed.title = "Set `captchaenabled` to `#{option}`"
+    end
+    next
+  elsif setting == 'captcharole'
+    unless option
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'No role given'
+      end
+      next
+    end
+    if event.server.role(option) == nil
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = "That role doesn't exist"
+      end
+      next
+    end
+    unless option.is_number?
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'That is not a number'
+      end
+      next
+    end
+    configfile = File.read('./config.json')
+    confighash = JSON.parse(configfile)
+    confighash['captcharole'] = option
+    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+    event.channel.send_embed do |embed|
+      embed.colour = 0x2ECC70
+      embed.title = "Set `captcharole` to `#{option}`"
     end
     next
   end
@@ -276,6 +324,11 @@ bot.member_join do |event|
     maxjoins = 10
   else
     maxjoins = Integer(confighash['maxjoins'])
+  end
+  if confighash['captcharole'] == nil
+    captcharole = nil
+  else
+    captcharole = event.server.role(confighash['captcharole'])
   end
 
   if File.exist?("temp/#{event.server.id}.log")
@@ -324,21 +377,22 @@ bot.member_join do |event|
     file.write("\n#{event.user.id}")
     file.close
   end
-  # WIP
   if confighash['captchaenabled'] == 'true'
     question, answer = captchagen
-    puts question
-    puts answer
     event.user.pm.send_embed do |embed|
-      embed.colour = 0xFF0000
+      embed.colour = 0x0080FF
       embed.title = 'Captcha'
       embed.description = "What is `#{question}`"
     end
     triesleft = 5
     event.user.await! do |captcha|
-      # i have no idea what im doing wrong here, will check tomorrow
-      if captcha.message.content == answer
+      unless captcha.message.content.is_number?
+        false
+        next
+      end
+      if Integer(captcha.message.content) == answer
         event.user.pm("Correct!")
+        event.user.add_role(captcharole, 'Passed captcha - AntiRaider')
         true
       else
         triesleft -= 1
@@ -348,11 +402,17 @@ bot.member_join do |event|
           true
         end
         if triesleft == 1
-          event.user.pm("Incorrect, you have #{triesleft} try left")
+          begin
+            event.user.pm("Incorrect, you have #{triesleft} try left")
+          rescue
+          end
         elsif triesleft <= -1
           next
         else
-          event.user.pm("Incorrect, you have #{triesleft} tries left")
+          begin
+            event.user.pm("Incorrect, you have #{triesleft} tries left")
+          rescue
+          end
         end
         false
       end
