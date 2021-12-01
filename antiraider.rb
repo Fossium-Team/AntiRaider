@@ -151,6 +151,11 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     else
       captcharole = confighash['captcharole']
     end
+    if confighash['joinrole'] == nil
+      joinrole = "none"
+    else
+      joinrole = confighash['joinrole']
+    end
 
     event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
@@ -171,6 +176,10 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
         Discordrb::Webhooks::EmbedField.new(
           name: 'captcharole: role id (of the role that the user gets after doing the captcha)',
           value: "Currently set to: #{captcharole}"
+        ),
+        Discordrb::Webhooks::EmbedField.new(
+          name: 'joinrole: role id (of the role that the user gets after joining **only used if captcha is disabled**)',
+          value: "Currently set to: #{joinrole}"
         )
       ]
     end
@@ -295,6 +304,40 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       embed.title = "Set `captcharole` to `#{option}`"
     end
     next
+  elsif setting == 'joinrole'
+    unless option
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'No role given'
+      end
+      next
+    end
+    if event.server.role(option) == nil
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = "That role doesn't exist"
+      end
+      next
+    end
+    unless option.is_number?
+      event.channel.send_embed do |embed|
+        embed.colour = 0xFF0000
+        embed.title = 'Oops...'
+        embed.description = 'That is not a number'
+      end
+      next
+    end
+    configfile = File.read('./config.json')
+    confighash = JSON.parse(configfile)
+    confighash['joinrole'] = option
+    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+    event.channel.send_embed do |embed|
+      embed.colour = 0x2ECC70
+      embed.title = "Set `joinrole` to `#{option}`"
+    end
+    next
   end
 end
 
@@ -324,11 +367,6 @@ bot.member_join do |event|
     maxjoins = 10
   else
     maxjoins = Integer(confighash['maxjoins'])
-  end
-  if confighash['captcharole'] == nil
-    captcharole = nil
-  else
-    captcharole = event.server.role(confighash['captcharole'])
   end
 
   if File.exist?("temp/#{event.server.id}.log")
@@ -377,7 +415,13 @@ bot.member_join do |event|
     file.write("\n#{event.user.id}")
     file.close
   end
+  if confighash['captchaenabled'] == nil && confighash['joinrole'] != nil
+    joinrole = event.server.role(confighash['joinrole'])
+    event.user.add_role(joinrole)
+    next
+  end
   if confighash['captchaenabled'] == 'true'
+    captcharole = event.server.role(confighash['captcharole'])
     question, answer = captchagen
     event.user.pm.send_embed do |embed|
       embed.colour = 0x0080FF
