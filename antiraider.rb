@@ -178,8 +178,8 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
           value: "Currently set to: #{captcharole}"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'joinrole: role id (of the role that the user gets after joining **only used if captcha is disabled**)',
-          value: "Currently set to: #{joinrole}"
+          name: 'joinrole: role id (of the role that the user gets after joining )',
+          value: "**only used if captcha is disabled**\nCurrently set to: #{joinrole}"
         )
       ]
     end
@@ -415,7 +415,7 @@ bot.member_join do |event|
     file.write("\n#{event.user.id}")
     file.close
   end
-  if confighash['captchaenabled'] == nil && confighash['joinrole'] != nil
+  if confighash['captchaenabled'] == nil || confighash['captchaenabled'] == 'false' && confighash['joinrole'] != nil
     joinrole = event.server.role(confighash['joinrole'])
     event.user.add_role(joinrole)
     next
