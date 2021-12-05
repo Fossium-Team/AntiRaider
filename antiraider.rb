@@ -383,20 +383,20 @@ bot.member_join do |event|
   end
 
   if File.exist?("temp/#{event.server.id}.log")
-    filetime = Time.parse(File.foreach("temp/#{event.server.id}.log").first)
+    logfile = File.read("temp/#{event.server.id}.log")
+    loghash = JSON.parse(logfile)
+    filetime = Time.parse(loghash['time'])
     difference = Time.now - filetime
     if difference >= timespan
-      file = File.open("temp/#{event.server.id}.log", "w")
-      file.write(Time.now)
-      file.write("\n#{event.user.id}")
-      file.close
+      loghash = {:time => Time.now}
+      loghash['joins'] = "1"
+      File.open("temp/#{event.server.id}.json", 'w') { |file| file.write(JSON.dump(loghash)) }
       next
     end
-    file = File.open("temp/#{event.server.id}.log", "a")
-    file.write("\n#{event.user.id}")
-    file.close
-    linecount = File.open("temp/#{event.server.id}.log", "r").each_line.count - 1
-    if linecount >= maxjoins
+    loghash['joins'] = "#{Integer(loghash['jsons']) + 1}"
+    File.open("temp/#{event.server.id}.json", 'w') { |file| file.write(JSON.dump(loghash)) }
+    joincount = Integer(loghash['joins'])
+    if joincount >= maxjoins
       event.user.pm.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Kicked by AntiRaider'
@@ -423,10 +423,9 @@ bot.member_join do |event|
       end
     end
   else
-    file = File.open("temp/#{event.server.id}.log", "w")
-    file.write(Time.now)
-    file.write("\n#{event.user.id}")
-    file.close
+    loghash = {:time => Time.now}
+    loghash['joins'] = "1"
+    File.open("temp/#{event.server.id}.json", 'w') { |file| file.write(JSON.dump(loghash)) }
   end
   if confighash['captchaenabled'] == nil || confighash['captchaenabled'] == 'false' && confighash['joinrole'] != nil
     joinrole = event.server.role(confighash['joinrole'])
