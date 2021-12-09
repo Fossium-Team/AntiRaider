@@ -24,9 +24,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.0
+      - name: Download Rakefile
+        run: |
+          wget -O https://gitlab.com/SKBotNL/fossium-stuff/-/raw/main/Rakefile
       - name: Install dependencies
         run: |
-          ls
           bundle add rake
           bundle install
       - name: Run tests
