@@ -26,7 +26,7 @@ jobs:
           ruby-version: 3.0
       - name: Install dependencies
         run: |
+          bundle add rake
           bundle install
-          gem install rake
       - name: Run tests
         run: bundle exec rake
