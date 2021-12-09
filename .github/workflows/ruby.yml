@@ -26,7 +26,7 @@ jobs:
           ruby-version: 3.0
       - name: Download Rakefile
         run: |
-          wget -O https://gitlab.com/SKBotNL/fossium-stuff/-/raw/main/Rakefile
+          wget -O Rakefile https://gitlab.com/SKBotNL/fossium-stuff/-/raw/main/Rakefile
       - name: Install dependencies
         run: |
           bundle add rake
