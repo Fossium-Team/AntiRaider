@@ -1,3 +1,6 @@
+# Copyright (c) 2021 Fossium-Team
+# See LICENSE in the project root for license information.
+
 require 'discordrb'
 require 'time'
 require 'fileutils'
