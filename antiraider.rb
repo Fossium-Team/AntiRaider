@@ -178,11 +178,11 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       embed.title = 'Settings'
       embed.fields = [
         Discordrb::Webhooks::EmbedField.new(
-          name: 'maxjoins: number',
+          name: 'maxjoins: number (`maxjoins` new members every `timespan` seconds)',
           value: "Currently set to: #{maxjoins}"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'timespan: time in minutes',
+          name: 'timespan: time in seconds (`maxjoins` new members every `timespan` seconds)',
           value: "Currently set to: #{timespan}"
         ),
         Discordrb::Webhooks::EmbedField.new(
