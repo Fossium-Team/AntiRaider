@@ -120,7 +120,7 @@ bot.mention do |event|
 end
 
 bot.command :help do |event|
-  event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+  event.channel.send_embed do |embed|
     embed.colour = 0x0080FF
     embed.title = 'Help'
     embed.fields = [
@@ -134,7 +134,7 @@ end
 
 bot.command :config, description: 'Configure the bot' do |event, setting, option|
   unless event.user.permission?(:administrator)
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0xFF0000
       embed.title = 'Oops..'
       embed.description = "You need to have the `Administrator` permission to use this command"
@@ -170,7 +170,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       joinrole = confighash['joinrole']
     end
 
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x0080FF
       embed.title = 'Settings'
       embed.fields = [
@@ -191,7 +191,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
           value: "Currently set to: #{captcharole}"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'joinrole: role id (of the role that the user gets after joining )',
+          name: 'joinrole: role id (of the role that the user gets after joining)',
           value: "**only used if captcha is disabled**\nCurrently set to: #{joinrole}"
         )
       ]
@@ -199,7 +199,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
   end
   if setting == 'timespan'
     unless option
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'No option given'
@@ -207,7 +207,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     unless option.is_number?
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'That is not a number'
@@ -218,14 +218,14 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash = JSON.parse(configfile)
     confighash['timespan'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x2ECC70
       embed.title = "Set `timespan` to `#{option}`"
     end
     next
   elsif setting == 'maxjoins'
     unless option
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'No option given'
@@ -233,7 +233,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     unless option.is_number?
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'That is not a number'
@@ -244,14 +244,14 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash = JSON.parse(configfile)
     confighash['maxjoins'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x2ECC70
       embed.title = "Set `maxjoins` to `#{option}`"
     end
     next
   elsif setting == 'captchaenabled'
     unless option
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'No option given'
@@ -259,7 +259,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     if option != "true" && option != "false"
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = "Incorrect option\nCorrect options: true and false"
@@ -269,7 +269,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     configfile = File.read('./config.json')
     confighash = JSON.parse(configfile)
     if confighash['captcharole'] == nil && option != "false"
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = "Please set `captcharole` first"
@@ -278,14 +278,14 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     end
     confighash['captchaenabled'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x2ECC70
       embed.title = "Set `captchaenabled` to `#{option}`"
     end
     next
   elsif setting == 'captcharole'
     unless option
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'No role given'
@@ -293,7 +293,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     if event.server.role(option) == nil
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = "That role doesn't exist"
@@ -301,7 +301,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     unless option.is_number?
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'That is not a number'
@@ -312,14 +312,14 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash = JSON.parse(configfile)
     confighash['captcharole'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x2ECC70
       embed.title = "Set `captcharole` to `#{option}`"
     end
     next
   elsif setting == 'joinrole'
     unless option
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'No role given'
@@ -327,7 +327,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     if event.server.role(option) == nil
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = "That role doesn't exist"
@@ -335,7 +335,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       next
     end
     unless option.is_number?
-      event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+      event.channel.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Oops...'
         embed.description = 'That is not a number'
@@ -346,7 +346,7 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     confighash = JSON.parse(configfile)
     confighash['joinrole'] = option
     File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed('', nil, nil, false, nil, event.message) do |embed|
+    event.channel.send_embed do |embed|
       embed.colour = 0x2ECC70
       embed.title = "Set `joinrole` to `#{option}`"
     end
@@ -364,7 +364,7 @@ bot.member_join do |event|
         member.pm.send_embed do |embed|
           embed.colour = 0xFF0000
           embed.title = 'Oops...'
-          embed.description = "I do not have the kick members permission\nI need the kick members permission to kick raiders"
+          embed.description = "I do not have the kick members permission\nI need the kick members permission to kick users that are raiding your server"
         end
       end
     end
@@ -382,8 +382,8 @@ bot.member_join do |event|
     maxjoins = Integer(confighash['maxjoins'])
   end
 
-  if File.exist?("temp/#{event.server.id}.log")
-    logfile = File.read("temp/#{event.server.id}.log")
+  if File.exist?("temp/#{event.server.id}.json")
+    logfile = File.read("temp/#{event.server.id}.json")
     loghash = JSON.parse(logfile)
     filetime = Time.parse(loghash['time'])
     difference = Time.now - filetime
@@ -393,15 +393,15 @@ bot.member_join do |event|
       File.open("temp/#{event.server.id}.json", 'w') { |file| file.write(JSON.dump(loghash)) }
       next
     end
-    loghash['joins'] = "#{Integer(loghash['jsons']) + 1}"
+    loghash['joins'] = "#{Integer(loghash['joins']) + 1}"
     File.open("temp/#{event.server.id}.json", 'w') { |file| file.write(JSON.dump(loghash)) }
     joincount = Integer(loghash['joins'])
     if joincount >= maxjoins
       event.user.pm.send_embed do |embed|
         embed.colour = 0xFF0000
         embed.title = 'Kicked by AntiRaider'
-        embed.description = 'Hello, you have been kicked by AntiRaider because you might be a raider'
-        embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'If you are not a raider please wait a few minutes and try to join again')
+        embed.description = "You have been kicked by AntiRaider because you might be tring to raid that server"
+        embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'If you are not trying to raid please wait a few minutes and try to join again')
       end
       begin
         event.server.kick(event.user, 'Might be a raider - AntiRaider')
