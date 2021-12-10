@@ -12,7 +12,7 @@ After that, download the latest release [here](https://github/Fossium-Team/AntiR
   Linux: Install `ruby` (on Debian/Ubuntu `ruby-full`) with your favorite package manager\
   MacOS: **Don't use the included Ruby with MacOS**, install it with homebrew instead `brew install ruby`
 #### After that install all the gems:
-  `bundle install` (in the AntiRaider directory)
+  `bundle install` (in the `AntiRaider` directory)
  
 This may take some time because some gems need to build system native extensions\
 After that you can run the Ruby file (just opening it should work, if it doesn't or if you use a terminal-based OS use Powershell/CMD or the terminal: `ruby ./antiraider.rb`)
