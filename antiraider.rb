@@ -135,7 +135,7 @@ bot.command :help do |event|
   end
 end
 
-bot.command :config, description: 'Configure the bot' do |event, setting, option|
+bot.command :config, description: 'Configure the bot' do |event, category, setting, option|
   unless event.user.permission?(:administrator)
     event.channel.send_embed do |embed|
       embed.colour = 0xFF0000
@@ -144,18 +144,23 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
     end
     next
   end
-  unless setting
+  unless category
     configfile = File.read('./config.json')
     confighash = JSON.parse(configfile)
     if confighash['timespan'] == nil
-      timespan = "300"
+      timespan = "60"
     else
       timespan = Integer(confighash['timespan']) * 60
     end
     if confighash['maxjoins'] == nil
-      maxjoins = "10"
+      maxjoins = "3"
     else
       maxjoins = Integer(confighash['maxjoins'])
+    end
+    if confighash['antiraidenabled'] == nil
+      antiraidenabled = "false"
+    else
+      antiraidenabled = confighash['antiraidenabled']
     end
     if confighash['captchaenabled'] == nil
       captchaenabled = "false"
@@ -178,182 +183,171 @@ bot.command :config, description: 'Configure the bot' do |event, setting, option
       embed.title = 'Settings'
       embed.fields = [
         Discordrb::Webhooks::EmbedField.new(
-          name: 'maxjoins: number (`maxjoins` new members every `timespan` seconds)',
-          value: "Currently set to: #{maxjoins}"
+          name: 'AntiRaid:',
+          value: "**Enabled**\nCurrently: #{antiraidenabled}\n**Rate limit**\nCurrently: #{maxjoins} new member(s) every #{timespan} seconds"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'timespan: time in seconds (`maxjoins` new members every `timespan` seconds)',
-          value: "Currently set to: #{timespan}"
+          name: 'Captcha:',
+          value: "**Enabled**\nCurrently: #{captchaenabled}\n**Captcha role** (The role given after a user passes the captcha)\nCurrently: `#{captcharole}`"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'captchaenabled: true or false',
-          value: "Currently set to: #{captchaenabled}"
+          name: 'Misc:',
+          value: "**joinrole** (The role given when a user joins the server)\nCurrently: #{joinrole}"
         ),
         Discordrb::Webhooks::EmbedField.new(
-          name: 'captcharole: role id (of the role that the user gets after doing the captcha)',
-          value: "Currently set to: #{captcharole}"
-        ),
-        Discordrb::Webhooks::EmbedField.new(
-          name: 'joinrole: role id (of the role that the user gets after joining)',
-          value: "**only used if captcha is disabled**\nCurrently set to: #{joinrole}"
+          name: 'Categories and options',
+          value: "AntiRaid:\n- **enabled** - `true` or `false`\n- **ratelimit** - number/number\nCaptcha:\n- **enabled** - `true` or `false`\n- **role** - role ID\nMisc:\n- **joinrole** - role ID or none\n\nFor example: `ar!config antiraid ratelimit 3/60`\nor `ar!config antiraid enabled true`"
         )
       ]
     end
+    next
   end
-  if setting == 'timespan'
-    unless option
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'No option given'
-      end
-      next
-    end
-    unless option.is_number?
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'That is not a number'
-      end
-      next
-    end
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    confighash['timespan'] = option
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+  unless setting
     event.channel.send_embed do |embed|
-      embed.colour = 0x2ECC70
-      embed.title = "Set `timespan` to `#{option}`"
+      embed.colour = 0xFF0000
+      embed.title = 'Oops...'
+      embed.description = 'No setting given'
     end
     next
-  elsif setting == 'maxjoins'
-    unless option
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'No option given'
-      end
-      next
-    end
-    unless option.is_number?
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'That is not a number'
-      end
-      next
-    end
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    confighash['maxjoins'] = option
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+  end
+  unless option
     event.channel.send_embed do |embed|
-      embed.colour = 0x2ECC70
-      embed.title = "Set `maxjoins` to `#{option}`"
+      embed.colour = 0xFF0000
+      embed.title = 'Oops...'
+      embed.description = 'No option given'
     end
     next
-  elsif setting == 'captchaenabled'
-    unless option
+  end
+  if category.downcase == 'antiraid'
+    if setting.downcase == 'enabled'
+      if option.downcase != "true" && option.downcase != "false"
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "Incorrect option\nCorrect options: true and false"
+        end
+        next
+      end
+      configfile = File.read('./config.json')
+      confighash = JSON.parse(configfile)
+      confighash['antiraidenabled'] = option.downcase
+      File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
       event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'No option given'
+        embed.colour = 0x2ECC70
+        embed.title = "Set `antiraidenabled` to `#{option.downcase}`"
+      end
+      next
+    elsif setting.downcase == 'ratelimit'
+      option = option.downcase.split('/')
+      unless option[2] == nil
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = 'Invalid syntax'
+        end
+        next
+      end
+      unless option[0].is_number? && option[1].is_number?
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = 'That is not a number'
+        end
+        next
+      end
+      configfile = File.read('./config.json')
+      confighash = JSON.parse(configfile)
+      confighash['maxjoins'] = option[0]
+      confighash['timespan'] = option[1]
+      File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+      event.channel.send_embed do |embed|
+        embed.colour = 0x2ECC70
+        embed.title = "Set `ratelimit` to `#{option.downcase}`"
       end
       next
     end
-    if option != "true" && option != "false"
+  elsif category.downcase == 'captcha'
+    if option.downcase == 'enabled'
+      if option.downcase != "true" && option.downcase != "false"
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "Incorrect option\nCorrect options: true and false"
+        end
+        next
+      end
+      configfile = File.read('./config.json')
+      confighash = JSON.parse(configfile)
+      if confighash['captcharole'] == nil && option.downcase != "false"
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "Please set `captcharole` first"
+        end
+        next
+      end
+      confighash['captchaenabled'] = option.downcase
+      File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
       event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = "Incorrect option\nCorrect options: true and false"
+        embed.colour = 0x2ECC70
+        embed.title = "Set `captchaenabled` to `#{option.downcase}`"
+      end
+      next
+    elsif option.downcase == 'role'
+      unless option.is_number?
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = 'That is not a number'
+        end
+        next
+      end
+      if event.server.role(option) == nil
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "That role doesn't exist"
+        end
+        next
+      end
+      configfile = File.read('./config.json')
+      confighash = JSON.parse(configfile)
+      confighash['captcharole'] = option
+      File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
+      event.channel.send_embed do |embed|
+        embed.colour = 0x2ECC70
+        embed.title = "Set `captcharole` to `#{option}`"
       end
       next
     end
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    if confighash['captcharole'] == nil && option != "false"
+  elsif category.downcase == 'misc'
+    if setting.downcase == 'joinrole'
+      unless option.is_number?
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = 'That is not a number'
+        end
+        next
+      end
+      if event.server.role(option) == nil
+        event.channel.send_embed do |embed|
+          embed.colour = 0xFF0000
+          embed.title = 'Oops...'
+          embed.description = "That role doesn't exist"
+        end
+        next
+      end
+      configfile = File.read('./config.json')
+      confighash = JSON.parse(configfile)
+      confighash['joinrole'] = option
+      File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
       event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = "Please set `captcharole` first"
+        embed.colour = 0x2ECC70
+        embed.title = "Set `joinrole` to `#{option}`"
       end
       next
     end
-    confighash['captchaenabled'] = option
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed do |embed|
-      embed.colour = 0x2ECC70
-      embed.title = "Set `captchaenabled` to `#{option}`"
-    end
-    next
-  elsif setting == 'captcharole'
-    unless option
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'No role given'
-      end
-      next
-    end
-    if event.server.role(option) == nil
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = "That role doesn't exist"
-      end
-      next
-    end
-    unless option.is_number?
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'That is not a number'
-      end
-      next
-    end
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    confighash['captcharole'] = option
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed do |embed|
-      embed.colour = 0x2ECC70
-      embed.title = "Set `captcharole` to `#{option}`"
-    end
-    next
-  elsif setting == 'joinrole'
-    unless option
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'No role given'
-      end
-      next
-    end
-    if event.server.role(option) == nil
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = "That role doesn't exist"
-      end
-      next
-    end
-    unless option.is_number?
-      event.channel.send_embed do |embed|
-        embed.colour = 0xFF0000
-        embed.title = 'Oops...'
-        embed.description = 'That is not a number'
-      end
-      next
-    end
-    configfile = File.read('./config.json')
-    confighash = JSON.parse(configfile)
-    confighash['joinrole'] = option
-    File.open("./config.json", 'w') { |file| file.write(JSON.dump(confighash)) }
-    event.channel.send_embed do |embed|
-      embed.colour = 0x2ECC70
-      embed.title = "Set `joinrole` to `#{option}`"
-    end
-    next
   end
 end
 
@@ -375,12 +369,12 @@ bot.member_join do |event|
   configfile = File.read('./config.json')
   confighash = JSON.parse(configfile)
   if confighash['timespan'] == nil
-    timespan = 300
+    timespan = 60
   else
-    timespan = Integer(confighash['timespan']) * 60
+    timespan = Integer(confighash['timespan'])
   end
   if confighash['maxjoins'] == nil
-    maxjoins = 10
+    maxjoins = 3
   else
     maxjoins = Integer(confighash['maxjoins'])
   end
