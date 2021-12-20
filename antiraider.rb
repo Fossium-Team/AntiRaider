@@ -196,7 +196,7 @@ bot.command :config, description: 'Configure the bot' do |event, category, setti
         ),
         Discordrb::Webhooks::EmbedField.new(
           name: 'Categories and options',
-          value: "AntiRaid:\n- **enabled** - `true` or `false`\n- **ratelimit** - number/number\nCaptcha:\n- **enabled** - `true` or `false`\n- **role** - role ID\nMisc:\n- **joinrole** - role ID or none\n\nFor example: `ar!config antiraid ratelimit 3/60`\nor `ar!config antiraid enabled true`"
+          value: "AntiRaid:\n- **enabled** - `true` or `false`\n- **ratelimit** - number/number\nCaptcha:\n- **enabled** - `true` or `false`\n- **role** - role ID\nMisc:\n- **joinrole** - role ID or none\n\nFor example: `ar!config antiraid ratelimit 3/60`\nor `ar!config captcha enabled true`"
         )
       ]
     end
