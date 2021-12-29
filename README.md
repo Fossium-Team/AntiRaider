@@ -1,4 +1,4 @@
-![AntiRaider](https://raw.githubusercontent.com/Fossium-Team/AntiRaider/main/images/AntiRaider_Full_White.png)
+![AntiRaider](https://raw.githubusercontent.com/Fossium-Team/AntiRaider/main/images/AntiRaider_Full_White.png)\
 [![Issues](https://img.shields.io/github/issues/Fossium-Team/AntiRaider?style=flat-square)](https://github.com/Fossium-Team/AntiRaider/issues) [![License](https://img.shields.io/github/license/Fossium-Team/AntiRaider?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html) [![Latest Release](https://img.shields.io/github/v/release/Fossium-Team/AntiRaider?style=flat-square)](https://github.com/Fossium-Team/AntiRaider/releases/latest) [![Reddit](https://img.shields.io/reddit/subreddit-subscribers/Fossium?style=flat-square)](https://reddit.com/r/Fossium)\
 A simple anti-raid Discord bot
 
