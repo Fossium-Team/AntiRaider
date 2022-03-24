@@ -4,7 +4,7 @@
 A simple anti-raid Discord bot
 
 ## Installing
-First, create a bot application [here](https://discord.com/developers) (if you don't know how, search it with your preferred search engine)\
+First, create a bot application [here](https://discord.com/developers) (if you don't know how, look it up with your preferred search engine)\
 **Make sure all intents are enabled**\
 After that, download the latest release [here](https://github.com/Fossium-Team/AntiRaider/releases/latest) and unzip it in a preferred folder
 #### Install Ruby:
